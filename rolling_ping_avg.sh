@@ -1,15 +1,24 @@
 #!/bin/sh
 
-# Usage function
-usage() {
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: $0 <hostname_or_ip> [ping_count]"
     echo "Example: $0 google.com 100"
-    exit 1
-}
+    echo ""
+    echo "Description:"
+    echo "  This script continuously pings the target and calculates a rolling average"
+    echo "  of the last N pings (default: 10). It ensures exactly 1-second intervals."
+    echo ""
+    echo "Options:"
+    echo "  --help, -h        Show help message"
+    echo "  [ping_count]      Number of pings for the rolling average (default: 10)"
+    exit 0
+fi
 
 # Check if an argument is given
 if [ -z "$1" ]; then
-    usage
+    echo "Error: No hostname or IP provided."
+    echo "Use '$0 --help' for usage information."
+    exit 1
 fi
 
 TARGET="$1"

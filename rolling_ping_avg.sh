@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Usage function
 usage() {
@@ -39,7 +39,7 @@ else
 fi
 
 # Default number of pings in rolling average
-PING_COUNT=${2:-10}  # Default to 100 if not provided
+PING_COUNT=${2:-100}  # Default to 100 if not provided
 
 echo "Pinging IP: $IP with rolling average of last $PING_COUNT pings"
 
@@ -48,6 +48,9 @@ ping_times=()
 seq_num=1  # Sequence number for each ping
 
 while true; do
+    # Get the start time before ping
+    start_time=$(date +%s.%N)  # High-precision timestamp
+
     # Get the current timestamp
     timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
@@ -76,15 +79,25 @@ while true; do
         avg=$(echo "scale=2; $sum / ${#ping_times[@]}" | bc)
 
         # Print the rolling average with timestamp and sequence number
-        # echo "[$timestamp] Ping $seq_num -> Rolling average of last ${#ping_times[@]} pings: $avg ms"
-        echo "[$timestamp] Ping $seq_num -> $avg ms"
-    else
-        echo "[$timestamp] Ping $seq_num -> Ping failed"
+        printf "[$timestamp] aPing %5d -> %s ms\n" "$seq_num" "$avg"
+        else
+        printf "[$timestamp] aPing %5d -> Ping failed\n" "$seq_num"
+    fi
+
+    # Get the end time after ping
+    end_time=$(date +%s.%N)
+
+    # Calculate time taken for ping
+    time_taken=$(echo "$end_time - $start_time" | bc)
+
+    # Calculate remaining sleep time to ensure exactly 1s interval
+    sleep_time=$(echo "1 - $time_taken" | bc)
+
+    # Ensure sleep time is not negative
+    if (( $(echo "$sleep_time > 0" | bc -l) )); then
+        sleep "$sleep_time"
     fi
 
     # Increment sequence number
     ((seq_num++))
-
-    # Wait 1 second before the next ping
-    sleep 1
 done

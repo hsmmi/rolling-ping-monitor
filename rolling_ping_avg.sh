@@ -54,6 +54,7 @@ echo "Pinging IP: $IP with rolling average of last $PING_COUNT pings"
 
 # Run ping in a loop and calculate rolling average
 ping_times=()
+running_sum=0   # Maintain the sum of ping times
 seq_num=1  # Sequence number for each ping
 
 while true; do
@@ -74,24 +75,30 @@ while true; do
     # If the ping was successful, store it
     if [[ -n "$ping_time" ]]; then
         ping_times+=("$ping_time")
+        running_sum=$(echo "$running_sum + $ping_time" | bc)
 
         # If we have more than PING_COUNT values, remove the oldest one
         if (( ${#ping_times[@]} > PING_COUNT )); then
-            ping_times=("${ping_times[@]:1}")
+            oldest_ping=${ping_times[0]}  # Get the oldest ping
+            running_sum=$(echo "$running_sum - $oldest_ping" | bc)  # Subtract from sum
+            ping_times=("${ping_times[@]:1}")  # Remove first element from array
         fi
 
         # Calculate the rolling average
-        sum=0
-        for time in "${ping_times[@]}"; do
-            sum=$(echo "$sum + $time" | bc)
-        done
-        avg=$(echo "scale=2; $sum / ${#ping_times[@]}" | bc)
+        if (( ${#ping_times[@]} > 0 )); then
+            avg=$(echo "scale=2; $running_sum / ${#ping_times[@]}" | bc)
+        else
+            avg="N/A"  # Avoid division by zero
+        fi
 
         # Print the rolling average with timestamp and sequence number
         printf "[$timestamp] aPing %5d - %s ms\n" "$seq_num" "$avg"
         else
         printf "[$timestamp] aPing %5d - Ping failed\n" "$seq_num"
     fi
+
+    # Increment sequence number
+    ((seq_num++))
 
     # Get the end time after ping
     end_time=$(date +%s.%N)
@@ -106,7 +113,4 @@ while true; do
     if (( $(echo "$sleep_time > 0" | bc -l) )); then
         sleep "$sleep_time"
     fi
-
-    # Increment sequence number
-    ((seq_num++))
 done

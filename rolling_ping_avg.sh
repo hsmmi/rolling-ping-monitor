@@ -39,7 +39,7 @@ else
 fi
 
 # Default number of pings in rolling average
-PING_COUNT=${2:-100}  # Default to 100 if not provided
+PING_COUNT=${2:-10}  # Default to 10 if not provided
 
 echo "Pinging IP: $IP with rolling average of last $PING_COUNT pings"
 

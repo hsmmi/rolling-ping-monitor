@@ -88,9 +88,9 @@ while true; do
         avg=$(echo "scale=2; $sum / ${#ping_times[@]}" | bc)
 
         # Print the rolling average with timestamp and sequence number
-        printf "[$timestamp] aPing %5d -> %s ms\n" "$seq_num" "$avg"
+        printf "[$timestamp] aPing %5d - %s ms\n" "$seq_num" "$avg"
         else
-        printf "[$timestamp] aPing %5d -> Ping failed\n" "$seq_num"
+        printf "[$timestamp] aPing %5d - Ping failed\n" "$seq_num"
     fi
 
     # Get the end time after ping
